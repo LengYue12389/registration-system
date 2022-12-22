@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>成绩录入</h1>
+    <HR style="FILTER: progid:DXImageTransform.Microsoft.Shadow(color:#9c9c9c,direction:145,strength:15)" color=#987cb9
+        SIZE=1>
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <!-- Table -->
+        <table class="table table-bordered table-condensed table-hover table-boxed  global-table competition-table">
+            <thead>
+            <tr>
+                <td>日期</td>
+                <td>比赛名称</td>
+                <td>地址</td>
+                <td>录入状态</td>
+                <td>操作</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in sli_content %}
+                <tr>
+                    <td>
+                        {{ item.match_time.strftime('%Y-%m-%d') }}
+                    </td>
+                    <td>
+                        {{ item.match_name }}
+                    </td>
+                    <td>
+                        {{ item.address }}
+                    </td>
+                    <td>
+                        {% if item.enter_status == MatchEnter.FUTURE_ENTER.value %}
+                            <span class="label label-info span-state">未录入</span>
+                        {% elif item.enter_status == MatchEnter.ENTERED.value %}
+                            <span class="label label-warning span-state">已录入</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('match.enter_achievement', match_id=item.id) }}">
+                            <button type="button" class="btn btn-success mybtn">录入</button>
+                        </a>
+                        <button type="button" class="btn btn-danger delete-data"
+                                value="{{ url_for("api.delete_ach_data", match_id=item.id) }}">删除
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {{ current_page.links }}
+    <script src="../../static/my/jquery.min.js"></script>
+    <script>
+        $('.delete-data').click(function () {
+            var bool = confirm("将删除该场比赛的所有成绩数据！")
+            var matchId = $(this).val()
+            if (bool) {
+                $.ajax({
+                    type: 'DELETE',
+                    url: matchId,
+                    success: (res) => {
+                        alert(res.result)
+                        window.location.reload();
+                    },
+                    error: () => {
+                        alert('服务器繁忙，请稍后重试')
+                    }
+                })
+            }
+        })
+    </script>
+{% endblock %}
